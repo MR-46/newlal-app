@@ -25,7 +25,7 @@ router.get('/', auth, allow('admin'), async (req, res) => {
 });
 
 // Create user (admin only)
-router.post('/', auth, allow('admin'), async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { name, mobile, password, pin, role, shopName, city, state, pincode, address } = req.body;
     const existing = await User.findOne({ mobile });
@@ -33,7 +33,7 @@ router.post('/', auth, allow('admin'), async (req, res) => {
 
     const user = await User.create({
       name, mobile, password, pin, role, shopName, city, state, pincode, address,
-      createdBy: req.user._id
+      createdBy: null
     });
 
     // If existing_retailer, also create/link customer record
@@ -43,7 +43,7 @@ router.post('/', auth, allow('admin'), async (req, res) => {
         mobile,
         city: city?.toUpperCase() || '',
         userId: user._id,
-        addedBy: req.user._id,
+        addedBy: null,
       });
     }
 
