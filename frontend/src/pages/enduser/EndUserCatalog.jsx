@@ -131,7 +131,7 @@ export function EndUserCatalog() {
             <div className="item-info">
               <div className="item-name">{item.itemName}</div>
               <div className="item-sub">{item.vehicle || item.brand || ''}</div>
-              {item.mrp && <div style={{ fontSize:12, color:'var(--success)', fontWeight:600 }}>₹{item.mrp × item.qty}</div>}
+              {item.mrp && <div style={{ fontSize:12, color:'var(--success)', fontWeight:600 }}>₹{item.mrp * item.qty}</div>}
             </div>
             <div className="qty-controls">
               <button className="qty-btn minus" onClick={() => setCart(p => p.map(c => c.itemId===item.itemId?{...c,qty:Math.max(1,c.qty-1)}:c))}>−</button>
