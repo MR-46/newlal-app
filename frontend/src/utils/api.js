@@ -1,7 +1,7 @@
 // src/utils/api.js
 import axios from 'axios';
 
-const api = axios.create({ baseURL: '/api' });
+const api = axios.create({ baseURL: 'newlal-app-production.up.railway.app/api' });
 
 api.interceptors.request.use(cfg => {
   const token = localStorage.getItem('nl_token');
