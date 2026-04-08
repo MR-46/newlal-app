@@ -153,32 +153,38 @@ router.post('/upload/add', auth, allow('admin'), upload.single('file'), async (r
   }
 });
 
-// Upload Excel - REPLACE entire master (admin)
+// Upload Excel - REPLACE entire master atomically (delete all → insert fresh)
 router.post('/upload/replace', auth, allow('admin'), upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
     const wb = XLSX.read(req.file.buffer, { type: 'buffer' });
     const ws = wb.Sheets[wb.SheetNames[0]];
     const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
 
-    // Delete all existing items
-    await Item.deleteMany({});
-
-    let added = 0, errors = [];
+    // Parse all rows first — fail fast if file is bad
+    const toInsert = [];
     for (const row of data) {
       const itemName = (row['ITEM NAME'] || row['Item Name'] || '').toString().trim().toUpperCase();
-      const partNumber = (row['PART NUMBER'] || row['Part Number'] || '').toString().trim().toUpperCase();
-      const brand = (row['BRAND/GROUP'] || row['Brand/Group'] || '').toString().trim().toUpperCase();
-      const vehicle = (row['VEHICLE'] || '').toString().trim().toUpperCase();
-      const unit = (row['UNIT'] || 'NOS').toString().trim().toUpperCase();
-      const originalDescription = (row['ORIGINAL DESCRIPTION'] || itemName).toString().trim().toUpperCase();
-
       if (!itemName) continue;
-      await Item.create({ originalDescription, itemName, vehicle, brand, partNumber, unit });
-      added++;
+      toInsert.push({
+        originalDescription: (row['ORIGINAL DESCRIPTION'] || itemName).toString().trim().toUpperCase(),
+        itemName,
+        vehicle:    (row['VEHICLE']     || '').toString().trim().toUpperCase(),
+        brand:      (row['BRAND/GROUP'] || row['Brand/Group'] || '').toString().trim().toUpperCase(),
+        partNumber: (row['PART NUMBER'] || row['Part Number'] || '').toString().trim().toUpperCase(),
+        unit:       (row['UNIT']        || 'NOS').toString().trim().toUpperCase(),
+      });
     }
 
-    res.json({ added, total: data.length, message: 'Item master replaced successfully' });
+    if (toInsert.length === 0)
+      return res.status(400).json({ error: 'No valid items found in file. Check column names.' });
+
+    // Atomic: delete ALL then insert fresh batch
+    await Item.deleteMany({});
+    await Item.insertMany(toInsert, { ordered: false });
+
+    res.json({ added: toInsert.length, total: data.length, message: 'Item master replaced successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
