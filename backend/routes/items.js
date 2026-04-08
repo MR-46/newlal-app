@@ -136,8 +136,11 @@ router.post('/upload/add', auth, allow('admin'), upload.single('file'), async (r
 
       if (!itemName) { errors.push(`Row skipped: no item name`); continue; }
 
-      // Check duplicate by itemName + partNumber + brand
-      const exists = await Item.findOne({ itemName, partNumber, brand });
+      // Check duplicate by itemName + partNumber + brand (case-insensitive, handle empty)
+      const dupQuery = { itemName: { $regex: `^${itemName}$`, $options: 'i' } };
+      if (partNumber) dupQuery.partNumber = { $regex: `^${partNumber}$`, $options: 'i' };
+      if (brand) dupQuery.brand = { $regex: `^${brand}$`, $options: 'i' };
+      const exists = await Item.findOne(dupQuery);
       if (exists) { skipped++; continue; }
 
       await Item.create({ originalDescription, itemName, vehicle, brand, partNumber, unit });
@@ -176,6 +179,16 @@ router.post('/upload/replace', auth, allow('admin'), upload.single('file'), asyn
     }
 
     res.json({ added, total: data.length, message: 'Item master replaced successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete ENTIRE item master (admin)
+router.delete('/master/all', auth, allow('admin'), async (req, res) => {
+  try {
+    const result = await Item.deleteMany({});
+    res.json({ message: 'Item master deleted', deleted: result.deletedCount });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
