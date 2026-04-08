@@ -82,7 +82,7 @@ const NAV_CONFIGS = {
     { to: '/admin/items', icon: Icon.package, label: 'Items' },
     { to: '/admin/customers', icon: Icon.users, label: 'Customers' },
     { to: '/admin/users', icon: Icon.user, label: 'Users' },
-    { to: '/admin/reports', icon: Icon.chart, label: 'Reports' },
+    { to: '/profile', icon: Icon.logout, label: 'Profile' },
   ],
   store_staff: [
     { to: '/staff/pending', icon: Icon.clock, label: 'Pending' },
