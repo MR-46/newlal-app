@@ -50,10 +50,21 @@ export function AdminItems() {
     finally { e.target.value = ''; }
   };
 
+  const deleteAllItems = async () => {
+    if (!window.confirm('⚠️ This will permanently delete ALL items from the database. This cannot be undone. Are you sure?')) return;
+    if (!window.confirm('Are you absolutely sure? All items will be deleted.')) return;
+    try {
+      const { data } = await api.delete('/items/master/all');
+      toast.success(`Deleted ${data.deleted} items. Upload a fresh master now.`);
+      fetch();
+    } catch (err) { toast.error(err.response?.data?.error || 'Failed to delete'); }
+  };
+
   return (
     <div>
       <TopNav title="Item Master" right={
         <div style={{ display:'flex', gap:6 }}>
+          <button className="btn btn-danger btn-sm" onClick={deleteAllItems} title="Delete all items">🗑️ Delete All</button>
           <button className="btn btn-outline btn-sm" onClick={() => setShowUpload(true)}>{Icon.upload}</button>
           <button className="btn btn-primary btn-sm" onClick={() => setShowAdd(true)}>{Icon.plus}</button>
         </div>
