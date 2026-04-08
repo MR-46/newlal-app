@@ -16,8 +16,8 @@ router.post('/login', async (req, res) => {
     if (user.isBlacklisted) return res.status(403).json({ error: 'Account is blacklisted' });
     if (!user.isActive) return res.status(403).json({ error: 'Account is inactive' });
 
-    const internalRoles = ['admin', 'salesperson', 'store_staff', 'b2c_staff'];
-    const externalRoles = ['existing_retailer', 'new_retailer', 'end_user'];
+    const internalRoles = ['admin', 'salesperson', 'store_staff', 'b2c_staff', 'existing_retailer'];
+    const externalRoles = ['new_retailer', 'end_user'];
 
     let match = false;
     if (internalRoles.includes(user.role) && user.password) {
