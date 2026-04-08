@@ -23,9 +23,7 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <TopNav title="Dashboard" right={
-        <button className="btn btn-ghost btn-sm" onClick={() => navigate('/admin/bin')} title="Recycle Bin">🗑️</button>
-      } />
+      <TopNav title="Dashboard" />
       <div className="page page-with-header">
 
         {/* Stats */}
@@ -55,6 +53,7 @@ export default function AdminDashboard() {
             { label:'👥 Customers', to:'/admin/customers' },
             { label:'👤 Users', to:'/admin/users' },
             { label:'📊 Reports', to:'/admin/reports' },
+            { label:'🗑️ Recycle Bin', to:'/admin/bin' },
           ].map(l => (
             <button key={l.to} className="btn btn-outline" onClick={() => navigate(l.to)} style={{ padding:'14px 12px', fontSize:13 }}>
               {l.label}
